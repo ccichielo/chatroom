@@ -8,15 +8,39 @@
 		text: string;
 	};
 
-	let messages: Message[] = [
-		{ user: 'Foo', text: 'Bar' },
-		{ user: 'Foo', text: 'Bar' }
-	];
+	let messages: Message[] = [];
+	let ws: WebSocket | null = null;
+
+	function connectWebSocket() {
+		if (!username) return;
+
+		ws = new WebSocket('ws://localhost:8080/ws?username=' + encodeURIComponent(username));
+
+		ws.onmessage = (event) => {
+			const message = JSON.parse(event.data) as Message;
+			messages = [...messages, message];
+		};
+
+		ws.onerror = (error) => {
+			console.error('Websocket error:', error);
+		};
+
+		ws.onclose = () => {
+			console.log('Websocket connection closed');
+		};
+	}
 
 	const handleSendMessage = (event: CustomEvent<string>) => {
 		const newMessage = event.detail;
-		messages = [...messages, { user: username, text: newMessage }];
+
+		if (ws && newMessage.trim()) {
+			ws.send(JSON.stringify({ user: username, text: newMessage }));
+		}
 	};
+
+	$: if (username) {
+		connectWebSocket();
+	}
 </script>
 
 <div class="chat-box">
