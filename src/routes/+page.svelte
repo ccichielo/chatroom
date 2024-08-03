@@ -1,2 +1,36 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+	import ChatWindow from '../components/ChatWindow.svelte';
+	import Login from '../components/Login.svelte';
+
+	let loggedIn = false;
+	let username = '';
+
+	const handleLogin = (event: CustomEvent<string>) => {
+		username = event.detail;
+		loggedIn = true;
+	};
+	const handleLogout = () => {
+		username = '';
+		loggedIn = false;
+	};
+</script>
+
+<main>
+	{#if !loggedIn}
+		<Login on:login={handleLogin} />
+	{:else}
+		<button on:click={handleLogout}>Logout</button>
+		<ChatWindow {username} />
+	{/if}
+</main>
+
+<style>
+	button {
+		padding: 10px 20px;
+		border: none;
+		border-radius: 5px;
+		background-color: #007bff;
+		color: white;
+		cursor: pointer;
+	}
+</style>
